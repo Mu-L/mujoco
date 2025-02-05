@@ -78,14 +78,14 @@
   X( mjtNum, cam_, ipd,          ncam, 1               ) \
   X( mjtNum, cam_, user,         ncam, MJ_M(nuser_cam) )
 
-#define MJMODEL_EQUALITY                    \
-  X( int,     eq_, type,   neq, 1         ) \
-  X( int,     eq_, obj1id, neq, 1         ) \
-  X( int,     eq_, obj2id, neq, 1         ) \
-  X( mjtByte, eq_, active, neq, 1         ) \
-  X( mjtNum,  eq_, solref, neq, mjNREF    ) \
-  X( mjtNum,  eq_, solimp, neq, mjNIMP    ) \
-  X( mjtNum,  eq_, data,   neq, mjNEQDATA )
+#define MJMODEL_EQUALITY                     \
+  X( int,     eq_, type,    neq, 1         ) \
+  X( int,     eq_, obj1id,  neq, 1         ) \
+  X( int,     eq_, obj2id,  neq, 1         ) \
+  X( mjtByte, eq_, active0, neq, 1         ) \
+  X( mjtNum,  eq_, solref,  neq, mjNREF    ) \
+  X( mjtNum,  eq_, solimp,  neq, mjNIMP    ) \
+  X( mjtNum,  eq_, data,    neq, mjNEQDATA )
 
 #define MJMODEL_EXCLUDE                      \
   X( int, exclude_, signature, nexclude, 1 )
@@ -140,8 +140,8 @@
   X( int,     dof_, parentid,     nv,   1               ) \
   X( int,     dof_, Madr,         nv,   1               ) \
   X( int,     dof_, simplenum,    nv,   1               ) \
-  X( mjtNum,  dof_, solref,       nv,   mjNREF          ) \
-  X( mjtNum,  dof_, solimp,       nv,   mjNIMP          ) \
+  X( mjtNum,  jnt_, solref,       njnt, mjNREF          ) \
+  X( mjtNum,  jnt_, solimp,       njnt, mjNIMP          ) \
   X( mjtNum,  dof_, frictionloss, nv,   1               ) \
   X( mjtNum,  dof_, armature,     nv,   1               ) \
   X( mjtNum,  dof_, damping,      nv,   1               ) \
@@ -168,7 +168,7 @@
   X( float,   light_, specular,      nlight,  3 )
 
 #define MJMODEL_MATERIAL                   \
-  X( int,     mat_, texid,       nmat, 1 ) \
+  X( int,     mat_, texid,       nmat, mjNTEXROLE ) \
   X( mjtByte, mat_, texuniform,  nmat, 1 ) \
   X( float,   mat_, texrepeat,   nmat, 2 ) \
   X( float,   mat_, emission,    nmat, 1 ) \
@@ -262,11 +262,12 @@
   X( float,   tendon, _rgba,         ntendon, 4                  )
 
 #define MJMODEL_TEXTURE                   \
-  X( int,     tex_, type,   ntex,     1 ) \
-  X( int,     tex_, height, ntex,     1 ) \
-  X( int,     tex_, width,  ntex,     1 ) \
-  X( int,     tex_, adr,    ntex,     1 ) \
-  X( mjtByte, tex_, rgb,    ntexdata, 1 )
+  X( int,     tex_, type,     ntex,     1 ) \
+  X( int,     tex_, height,   ntex,     1 ) \
+  X( int,     tex_, width,    ntex,     1 ) \
+  X( int,     tex_, nchannel, ntex,     1 ) \
+  X( int,     tex_, adr,      ntex,     1 ) \
+  X( mjtByte, tex_, data,     ntexdata, 1 )
 
 #define MJMODEL_TUPLE                         \
   X( int,    tuple_, adr,     ntuple,     1 ) \
@@ -281,7 +282,8 @@
   X( mjtNum, key_, qvel,  nkey, MJ_M(nv)       ) \
   X( mjtNum, key_, act,   nkey, MJ_M(na)       ) \
   X( mjtNum, key_, mpos,  nkey, MJ_M(nmocap)*3 ) \
-  X( mjtNum, key_, mquat, nkey, MJ_M(nmocap)*4 )
+  X( mjtNum, key_, mquat, nkey, MJ_M(nmocap)*4 ) \
+  X( mjtNum, key_, ctrl,  nkey, MJ_M(nu)       )
 
 #define MJMODEL_VIEW_GROUPS                                            \
   XGROUP( MjModelActuatorViews, actuator, nu,       MJMODEL_ACTUATOR ) \
@@ -304,6 +306,28 @@
   XGROUP( MjModelTextureViews,  tex,      ntex,     MJMODEL_TEXTURE  ) \
   XGROUP( MjModelTupleViews,    tuple,    ntuple,   MJMODEL_TUPLE    ) \
   XGROUP( MjModelKeyframeViews, key,      nkey,     MJMODEL_KEYFRAME )
+
+#define MJMODEL_BIND_GROUPS      \
+  XGROUP( mjsActuator, actuator) \
+  XGROUP( mjsBody,     body    ) \
+  XGROUP( mjsCamera,   cam     ) \
+  XGROUP( mjsEquality, eq      ) \
+  XGROUP( mjsExclude,  exclude ) \
+  XGROUP( mjsGeom,     geom    ) \
+  XGROUP( mjsHField,   hfield  ) \
+  XGROUP( mjsJoint,    jnt     ) \
+  XGROUP( mjsLight,    light   ) \
+  XGROUP( mjsMaterial, mat     ) \
+  XGROUP( mjsMesh,     mesh    ) \
+  XGROUP( mjsNumeric,  numeric ) \
+  XGROUP( mjsPair,     pair    ) \
+  XGROUP( mjsSensor,   sensor  ) \
+  XGROUP( mjsSite,     site    ) \
+  XGROUP( mjsSkin,     skin    ) \
+  XGROUP( mjsTendon,   tendon  ) \
+  XGROUP( mjsTexture,  tex     ) \
+  XGROUP( mjsTuple,    tuple   ) \
+  XGROUP( mjsKey,      key     )
 
 #define MJMODEL_VIEW_GROUPS_ALTNAMES        \
   XGROUP( cam, camera,   MJMODEL_CAMERA   ) \
@@ -355,7 +379,6 @@
   X( mjtNum, , xaxis,           njnt, 3           ) \
   X( mjtNum, , cdof,            nv,   6           ) \
   X( mjtNum, , qLDiagInv,       nv,   1           ) \
-  X( mjtNum, , qLDiagSqrtInv,   nv,   1           ) \
   X( mjtNum, , cdof_dot,        nv,   6           ) \
   X( mjtNum, , qfrc_bias,       nv,   1           ) \
   X( mjtNum, , qfrc_passive,    nv,   1           ) \
@@ -396,6 +419,17 @@
   XGROUP( MjDataSensorViews,   sensor,   nsensor,  MJDATA_SENSOR   ) \
   XGROUP( MjDataSiteViews,     site,     nsite,    MJDATA_SITE     ) \
   XGROUP( MjDataTendonViews,   tendon,   ntendon,  MJDATA_TENDON   )
+
+#define MJDATA_BIND_GROUPS       \
+  XGROUP( mjsActuator, actuator) \
+  XGROUP( mjsBody,     body    ) \
+  XGROUP( mjsCamera,   cam     ) \
+  XGROUP( mjsGeom,     geom    ) \
+  XGROUP( mjsJoint,    jnt     ) \
+  XGROUP( mjsLight,    light   ) \
+  XGROUP( mjsSensor,   sensor  ) \
+  XGROUP( mjsSite,     site    ) \
+  XGROUP( mjsTendon,   tendon  )
 
 #define MJDATA_VIEW_GROUPS_ALTNAMES       \
   XGROUP( cam,    camera, MJDATA_CAMERA ) \

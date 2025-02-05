@@ -6,7 +6,7 @@ possible in your code contributions.
 
 ### Scope of this guide
 
-MuJoCo has three main code categories:
+Most of this guide involves C/C++ code. For Python, jump to the section [below](#python-code). For MuJoCo C/C++, code has three main categories:
 
 1. **C code:** MuJoCo's core codebase. It consists of public headers under
 `include/` and C source files and internal headers under `src/`. This style
@@ -34,7 +34,7 @@ takes precedence. Additional principles include:
 
 - Follow the [naming conventions](https://mujoco.readthedocs.io/en/latest/programming#naming-convention).
 - Be sparing with horizontal space: Try to keep lines short, avoid line-breaks
-where possble.
+  where possible.
 - Be generous with vertical space: Empty lines between code blocks are good.
 - Keep names short.
 - Inline comments are part of the code, treat them as such.
@@ -58,8 +58,8 @@ spot such a pattern, feel free to send a PR to update the guide.
 
 Line length is 100 characters. In rare situations, like the collision table at
 the top of
-[engine_collision_driver.c](https://github.com/deepmind/mujoco/blob/c8ff7b3d341560e8cc33fbdcaffbcdbc4c32327c/src/engine/engine_collision_driver.c#L36),
-longer lines are alowed for readability.
+[engine_collision_driver.c](https://github.com/google-deepmind/mujoco/blob/c8ff7b3d341560e8cc33fbdcaffbcdbc4c32327c/src/engine/engine_collision_driver.c#L36),
+longer lines are allowed for readability.
 
 #### Comments
 
@@ -88,8 +88,8 @@ including for one-line blocks:
   ```C
   // transpose matrix
   void mju_transpose(mjtNum* res, const mjtNum* mat, int nr, int nc) {
-    for (int i=0; i<nr; i++) {
-      for (int j=0; j<nc; j++) {
+    for (int i=0; i < nr; i++) {
+      for (int j=0; j < nc; j++) {
         res[j*nr+i] = mat[i*nc+j];
       }
     }
@@ -99,7 +99,7 @@ including for one-line blocks:
 - Brace-less single line statements are allowed outside of `engine/` code, for
 similar, repeated blocks, that do not contain flow control statements (`return`,
 `continue`, etc.). For an example of this exception, inspect the [`mjCModel`
-destructor](https://github.com/deepmind/mujoco/search?q=repo%3Adeepmind%2Fmujoco+filename%3Auser_model.cc).
+destructor](https://github.com/google-deepmind/mujoco/search?q=repo%3Adeepmind%2Fmujoco+filename%3Auser_model.cc).
 
 - Unattached braces are allowed in `if/else` blocks, when inserting a comment
 before the `else`:
@@ -108,7 +108,7 @@ before the `else`:
   // rotate vector by quaternion
   void mju_rotVecQuat(mjtNum res[3], const mjtNum vec[3], const mjtNum quat[4]) {
     // null quat: copy vec
-    if (quat[0]==1 && quat[1]==0 && quat[2]==0 && quat[3]==0) {
+    if (quat[0] == 1 && quat[1] == 0 && quat[2] == 0 && quat[3] == 0) {
       mju_copy3(res, vec);
     }
 
@@ -116,7 +116,7 @@ before the `else`:
     else {
       mjtNum mat[9];
       mju_quat2Mat(mat, quat);
-      mju_rotVecMat(res, vec, mat);
+      mju_mulMatVec3(res, mat, vec);
     }
   }
   ```
@@ -138,11 +138,13 @@ assignments:
   }
   ```
 
-- Spaces are not allowed around comparison operators in `for` statements and
-inside array subscripts `[]`. For an example, inspect the `mju_transpose`
-implementation above.
+- Spaces are required around comparison operators.
 
-- Three empty lines between function declarations.
+- Spaces are not allowed around operators in array subscripts `[]` or in
+  variable initialisation in `for` loops. For example, inspect the
+  `mju_transpose` implementation above.
+
+- Three blank lines are required between function implementations in source files.
 
 #### Variable declarations
 
@@ -156,3 +158,7 @@ example above.
 New code should use the C99 convention. When editing an existing function,
 please move existing variable declarations into local scope. Pull requests
 helping us to complete the migration are very welcome.
+
+### [Python code](#python-code)
+
+For Python code, run `pyink foo.py` to adhere to Google's [Python style guide](https://google.github.io/styleguide/pyguide.html). For sorting and cleaning imports, run `isort foo.py`. Both `pyink` and `isort` can be pip installed via `pip install pyink isort`.
